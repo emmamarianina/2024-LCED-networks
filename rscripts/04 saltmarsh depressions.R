@@ -79,5 +79,8 @@ summary(model)
 
 # test if the bare soil cover is different
 
+model.bare <- lmer(BareCov~ Type + (1 | Point), data = AllData)
+summary(model.bare)
+
 # test if the species community composition is different with a permanova
 
