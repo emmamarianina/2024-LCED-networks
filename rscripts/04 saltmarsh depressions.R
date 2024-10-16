@@ -11,7 +11,7 @@ library(lme4)
 library(lmerTest)
 
 # we work with the following database that you made on monday
-browseURL("https://docs.google.com/spreadsheets/d/1gAhwMWjA6aD3SMHb0j9X_4xYaxsDBNre6B5XyWDgzzI/edit?usp=sharing")
+#browseURL("https://docs.google.com/spreadsheets/d/1gAhwMWjA6aD3SMHb0j9X_4xYaxsDBNre6B5XyWDgzzI/edit?usp=sharing")
 
 # read the data tables from the database
 MetTables<- read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2zhCjdrR-4sMpcfvyXunOBdLXKI2VYBnTa8u2Xs-yCTQmLYhE54bl7g9a2-9zRxvgqmCe0RXDuW1X/pub?gid=894288297&single=true&output=csv')
@@ -85,6 +85,45 @@ summary(model.bare)
 # test if the species community composition is different with a permanova
 # install.packages("vegan")
 library(vegan)
+
+names(AllData)
+
+#calculate the difference of 100 - BareCov
+AllData2 <- AllData |>
+  dplyr::mutate(SpeCov = 100 - BareCov)
+
+#Now select VegObs, DomPlantName, and SpeCov
+species_matrix <- AllData2 |>
+  dplyr::select(VegObs_ID, Type,DomPlantName, SpeCov) |>
+  spread(key = VegObs_ID, value = SpeCov) 
+
+#test if the species community composition is different with a permanova
+names(species_matrix)
+
+bray_spec <- vegdist(species_matrix[,c(3:56)], method="bray", binary=FALSE, diag=FALSE, upper=FALSE) #gives error, fix it
+
+# Remove rows with missing values
+species_matrix_clean <- na.omit(species_matrix[, c(3:56)])
+
+# Run vegdist on the cleaned matrix
+dist_matrix <- vegdist(species_matrix_clean, method = "bray")
+
+
+# Replace NA with zero (for example, assuming that NA means no observation)
+species_matrix_filled <- species_matrix
+species_matrix_filled[is.na(species_matrix_filled)] <- 0
+
+# Run vegdist on the matrix with NA replaced
+dist_matrix <- vegdist(species_matrix_filled[, c(3:56)], method = "bray")
+
+# Replace NA with zero (for example, assuming that NA means no observation)
+species_matrix_filled <- species_matrix
+species_matrix_filled[is.na(species_matrix_filled)] <- 0
+
+# Run vegdist on the matrix with NA replaced
+dist_matrix <- vegdist(species_matrix_filled[, c(3:56)], method = "bray")
+
+adonis2(dist_matrix~Type, data=species_matrix) #not different
 
 
 
