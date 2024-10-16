@@ -83,4 +83,8 @@ model.bare <- lmer(BareCov~ Type + (1 | Point), data = AllData)
 summary(model.bare)
 
 # test if the species community composition is different with a permanova
+# install.packages("vegan")
+library(vegan)
+
+
 
